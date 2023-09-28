@@ -4,13 +4,16 @@
 
 
 # Config
-**Default Path:**
+**Default Path:**  
 - Unix: `$XDG_CONFIG_HOME`, if not then `$HOME/.config/`
 - Darwin: `$HOME/Library/Application`
 - Windows: `%AppData%`
 
+with path: `/transfer-go/base_server.yml`
 
-**Custom Path:**
+
+
+**Custom Path:**  
 Provide args: `-c <your_custom_path>`
 
 
@@ -79,6 +82,6 @@ The outputs are shown in stdout:
 ```
 
 ## With Proxy Server
-Require a server with **public IP address** for transmitting ips and ports of each other to both clients
+Require a server with **public IP address** for transmitting ips and ports of each other to both clients.
 
 In progress...
