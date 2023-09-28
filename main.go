@@ -1,9 +1,7 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"net"
 	"os"
 
 	"golang.org/x/exp/slog"
@@ -20,19 +18,21 @@ func test() {
 	if err != nil {
 		panic(err)
 	}
-	server.AddTypeCallback("push", func(conn net.Conn, reader *bufio.Reader) error {
+	server.AddTypeCallback("push", func(conn *normal.Conn) error {
 		// read and print every single byte till the end
+		fmt.Printf("Type: %s\n", conn.Type)
 		for {
-			b, readerr := reader.ReadByte()
+			b, readerr := conn.Reader.ReadByte()
 			if readerr != nil {
 				if readerr.Error() == "EOF" {
+					fmt.Print("\n")
 					conn.Close()
 					return nil
 				} else {
 					return readerr
 				}
 			}
-			fmt.Println(b)
+			fmt.Printf("%d ", b)
 		}
 	})
 	if err := server.Serv(); err != nil {

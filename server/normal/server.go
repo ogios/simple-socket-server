@@ -18,7 +18,7 @@ type Server struct {
 	cond          sync.Cond
 }
 
-type TypeCallback func(net.Conn, *bufio.Reader) error
+type TypeCallback func(*Conn) error
 
 func NewSocketServer() (*Server, error) {
 	l, err := net.Listen("tcp", config.GLOBAL_CONFIG.Server.Addr)
@@ -65,10 +65,13 @@ func (s *Server) Process(conn net.Conn) {
 	log.Debug(nil, "Connection <%s> start processing", conn.RemoteAddr().String())
 	reader := bufio.NewReader(conn)
 	t, err := reader.ReadString(0xa)
-	t = t[:len(t)-1]
 	if err != nil {
 		panic(err)
 	}
+	if len(t) < 1 {
+		panic("Type is empty")
+	}
+	t = t[:len(t)-1]
 
 	// get callback and execute
 	s.cond.L.Lock()
@@ -77,7 +80,11 @@ func (s *Server) Process(conn net.Conn) {
 	if !ok {
 		panic(fmt.Sprintf("Unknow type: %s", t))
 	}
-	err = process(conn, reader)
+	err = process(&Conn{
+		Raw:    conn,
+		Reader: reader,
+		Type:   t,
+	})
 	if err != nil {
 		log.Error(nil, "Process error: %s", err)
 	}

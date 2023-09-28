@@ -41,19 +41,21 @@ func main() {
 First we add a custom type callback for type `push` and start the server  
 In the callback function, we read and print bytes one by one:
 ```go
-server.AddTypeCallback("push", func(conn net.Conn, reader *bufio.Reader) error {
+server.AddTypeCallback("push", func(conn *normal.Conn) error {
     // read and print every single byte till the end
+    fmt.Printf("Type: %s\n", conn.Type)
     for {
-        b, readerr := reader.ReadByte()
+        b, readerr := conn.Reader.ReadByte()
         if readerr != nil {
             if readerr.Error() == "EOF" {
+                fmt.Print("\n")
                 conn.Close()
                 return nil
             } else {
                 return readerr
             }
         }
-        fmt.Println(b)
+        fmt.Printf("%d ", b)
     }
 })
 server.Serv()
@@ -76,10 +78,8 @@ s.close()
 ```
 The outputs are shown in stdout:
 ```
-100
-97
-116
-97
+Type: push
+100 97 116 97 
 ```
 
 ## With Proxy Server
