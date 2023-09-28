@@ -58,7 +58,8 @@ server.AddTypeCallback("push", func(conn net.Conn, reader *bufio.Reader) error {
 })
 server.Serv()
 ```
-And we send a UTF-8 string bytes using python or whatever:  
+And we send a UTF-8 string bytes using python or whatever  
+The request body should be `<type>\n<body>`, and there shouldn't be any `\n` in type:
 ```python
 import socket
 
