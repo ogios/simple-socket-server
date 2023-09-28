@@ -1,4 +1,4 @@
-module transfer-go
+module github.com/ogios/simple-socket-server
 
 go 1.21.0
 

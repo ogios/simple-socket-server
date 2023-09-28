@@ -6,10 +6,7 @@ import (
 	"math"
 	"net"
 
-	"transfer-go/api/request/types"
-	"transfer-go/log"
-
-	"golang.org/x/exp/slog"
+	"github.com/ogios/simple-socket-server/log"
 )
 
 func GetLen(reader *bufio.Reader) int {
@@ -34,7 +31,7 @@ func Process(conn net.Conn) {
 			log.Error(nil, "Connection process error: %s", err)
 		}
 	}()
-	slog.Debug("Connection <%s> start processing", conn.RemoteAddr().String())
+	log.Debug(nil, "Connection <%s> start processing", conn.RemoteAddr().String())
 	conn.Close()
 	reader := bufio.NewReader(conn)
 	// t, err := reader.ReadString(0xa)

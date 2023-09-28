@@ -7,26 +7,29 @@ import (
 	"strings"
 	"sync"
 
-	"transfer-go/config"
-	"transfer-go/log"
+	"github.com/ogios/simple-socket-server/config"
+	"github.com/ogios/simple-socket-server/log"
 )
 
 type Server struct {
 	Listener      net.Listener
 	Addr          string
-	typeCallbacks map[string][]func(net.Conn) error
+	typeCallbacks map[string]TypeCallback
 	cond          sync.Cond
 }
 
+type TypeCallback func(net.Conn, *bufio.Reader) error
+
 func NewSocketServer() (*Server, error) {
-	l, err := net.Listen("tcp", config.SysConfig.Server.Addr)
+	l, err := net.Listen("tcp", config.GLOBAL_CONFIG.Server.Addr)
 	if err != nil {
 		return nil, err
 	}
 	return &Server{
-		Listener: l,
-		Addr:     config.SysConfig.Server.Addr,
-		cond:     *sync.NewCond(&sync.Mutex{}),
+		Listener:      l,
+		Addr:          config.GLOBAL_CONFIG.Server.Addr,
+		cond:          *sync.NewCond(&sync.Mutex{}),
+		typeCallbacks: map[string]TypeCallback{},
 	}, nil
 }
 
@@ -45,46 +48,50 @@ func (s *Server) Serv() error {
 
 // for loop runs callbacks
 func (s *Server) Process(conn net.Conn) {
-	defer conn.Close()
+	// close Connection
+	defer func() {
+		log.Info(nil, "Connection <%s> closed", conn.RemoteAddr().String())
+		conn.Close()
+	}()
+
+	// catch error
 	defer func() {
 		if err := recover(); err != nil {
-			log.Error(nil, "Connection process error: %s", err)
+			log.Error(nil, "Unexpected Connection process error: %s", err)
 		}
 	}()
+
+	// read type until \n
 	log.Debug(nil, "Connection <%s> start processing", conn.RemoteAddr().String())
-	conn.Close()
 	reader := bufio.NewReader(conn)
 	t, err := reader.ReadString(0xa)
+	t = t[:len(t)-1]
 	if err != nil {
 		panic(err)
 	}
+
+	// get callback and execute
 	s.cond.L.Lock()
-	processes, ok := s.typeCallbacks[t]
+	process, ok := s.typeCallbacks[t]
 	s.cond.L.Unlock()
 	if !ok {
 		panic(fmt.Sprintf("Unknow type: %s", t))
 	}
-	for _, process := range processes {
-		err := process(conn)
-		if err != nil {
-			log.Error(nil, "Process error: %s", err)
-		}
+	err = process(conn, reader)
+	if err != nil {
+		log.Error(nil, "Process error: %s", err)
 	}
+	log.Debug(nil, "Connection <%s> process done", conn.RemoteAddr().String())
 }
 
 // add callbacks for certain type
-func (s *Server) AddTypeCallback(t string, callback func(net.Conn) error) (okk bool) {
+func (s *Server) AddTypeCallback(t string, callback TypeCallback) (okk bool) {
 	if strings.Contains(t, "\n") {
 		log.Error(nil, "type does not support string with \\n")
 		return false
 	}
 	s.cond.L.Lock()
-	_, ok := s.typeCallbacks[t]
-	if !ok {
-		s.typeCallbacks[t] = []func(net.Conn) error{callback}
-	} else {
-		s.typeCallbacks[t] = append(s.typeCallbacks[t], callback)
-	}
+	s.typeCallbacks[t] = callback
 	s.cond.L.Unlock()
 	return true
 }

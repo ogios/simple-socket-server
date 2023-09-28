@@ -9,7 +9,13 @@ import (
 
 func init() {
 	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
-		Level: slog.LevelDebug,
+		Level: slog.LevelInfo,
+	})))
+}
+
+func SetLevel(l slog.Leveler) {
+	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+		Level: l,
 	})))
 }
 
