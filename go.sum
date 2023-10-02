@@ -1,3 +1,5 @@
+github.com/ogios/sutils v0.1.1 h1:HLsjYzjkG2kmu6ubSzJxy5/OFsKUB+9lBFU+RlDeO7c=
+github.com/ogios/sutils v0.1.1/go.mod h1:nPIARZnGDLW/kZA/gGfGHYXVV3JXpvOXuhoa1qWZOV4=
 golang.org/x/exp v0.0.0-20230905200255-921286631fa9 h1:GoHiUyI/Tp2nVkLI2mCxVkOjsbSXD66ic0XW0js0R9g=
 golang.org/x/exp v0.0.0-20230905200255-921286631fa9/go.mod h1:S2oDrQGGwySpoQPVqRShND87VCbxmc6bL1Yd2oYrm6k=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=

@@ -21,19 +21,13 @@ func test() {
 	server.AddTypeCallback("push", func(conn *normal.Conn) error {
 		// read and print every single byte till the end
 		fmt.Printf("Type: %s\n", conn.Type)
-		for {
-			b, readerr := conn.Reader.ReadByte()
-			if readerr != nil {
-				if readerr.Error() == "EOF" {
-					fmt.Print("\n")
-					conn.Close()
-					return nil
-				} else {
-					return readerr
-				}
-			}
-			fmt.Printf("%d ", b)
+		b, readerr := conn.Si.GetSec()
+		conn.Close()
+		if readerr != nil {
+			return readerr
 		}
+		fmt.Printf("%d ", b)
+		return nil
 	})
 	if err := server.Serv(); err != nil {
 		panic(err)

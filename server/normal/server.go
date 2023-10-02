@@ -7,6 +7,8 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/ogios/sutils"
+
 	"github.com/ogios/simple-socket-server/config"
 	"github.com/ogios/simple-socket-server/log"
 )
@@ -16,6 +18,7 @@ type Server struct {
 	Addr          string
 	typeCallbacks map[string]TypeCallback
 	cond          sync.Cond
+	MaxTypeLength int
 }
 
 type TypeCallback func(*Conn) error
@@ -30,6 +33,7 @@ func NewSocketServer() (*Server, error) {
 		Addr:          config.GLOBAL_CONFIG.Server.Addr,
 		cond:          *sync.NewCond(&sync.Mutex{}),
 		typeCallbacks: map[string]TypeCallback{},
+		MaxTypeLength: 1024,
 	}, nil
 }
 
@@ -61,17 +65,19 @@ func (s *Server) Process(conn net.Conn) {
 		}
 	}()
 
-	// read type until \n
+	// read type
 	log.Debug(nil, "Connection <%s> start processing", conn.RemoteAddr().String())
 	reader := bufio.NewReader(conn)
-	t, err := reader.ReadString(0xa)
+	cc := new(Conn)
+	cc.Raw = conn
+	cc.Si = sutils.NewSBodyIn(reader)
+	cc.So = sutils.NewSBodyOUT()
+	cc.Reader = reader
+	t, err := cc.GetType(s.MaxTypeLength)
 	if err != nil {
 		panic(err)
 	}
-	if len(t) < 1 {
-		panic("Type is empty")
-	}
-	t = t[:len(t)-1]
+	cc.Type = t
 
 	// get callback and execute
 	s.cond.L.Lock()
@@ -80,11 +86,7 @@ func (s *Server) Process(conn net.Conn) {
 	if !ok {
 		panic(fmt.Sprintf("Unknow type: %s", t))
 	}
-	err = process(&Conn{
-		Raw:    conn,
-		Reader: reader,
-		Type:   t,
-	})
+	err = process(cc)
 	if err != nil {
 		log.Error(nil, "Process error: %s", err)
 	}
