@@ -53,10 +53,10 @@ func (s *Server) Serv() error {
 // for loop runs callbacks
 func (s *Server) Process(conn net.Conn) {
 	// close Connection
-	defer func() {
-		log.Info(nil, "Connection <%s> closed", conn.RemoteAddr().String())
-		conn.Close()
-	}()
+	// defer func() {
+	// 	log.Info(nil, "Connection <%s> closed", conn.RemoteAddr().String())
+	// 	conn.Close()
+	// }()
 
 	// catch error
 	defer func() {
