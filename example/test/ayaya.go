@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/ogios/simple-socket-server/log"
 	"github.com/ogios/simple-socket-server/server/normal"
 )
 
@@ -49,7 +50,7 @@ func Fill(server *normal.Server) {
 			conn.So.AddBytes(err)
 			conn.So.WriteTo(conn.Raw)
 		} else {
-			fmt.Println("\n!!!!!!!!!!!!!!!!!done!!!!!!!!!!!!!!\n")
+			log.Debug(nil, "!!!!!!!!!!!!!!!!!!done!!!!!!!!!!!!!!!!!!")
 		}
 	})
 }

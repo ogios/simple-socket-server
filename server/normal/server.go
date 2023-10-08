@@ -84,9 +84,9 @@ func (s *Server) execute(conn *Conn) {
 		if err != nil {
 			log.Error(nil, "Process error: %s", err)
 			defer conn.Close()
-			for _, em := range s.ems {
-				em(conn, err)
-			}
+		}
+		for _, em := range s.ems {
+			em(conn, err)
 		}
 	}()
 

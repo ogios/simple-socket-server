@@ -24,9 +24,9 @@ func Client() {
 		panic(err)
 	}
 	fmt.Println(string(b))
-	b, err = si.GetSec()
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(string(b))
+	// b, err = si.GetSec()
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// fmt.Println(string(b))
 }
